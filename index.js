@@ -35,6 +35,31 @@ app.get('/', (req, res) => {
       res.status(500).json({ status: 500, error: true, message: 'you have to provide a search' });
     }
   });
+
+const movies = [
+  { title: 'Jaws', year: 1975, rating: 8 },
+  { title: 'Avatar', year: 2009, rating: 7.8 },
+  { title: 'Brazil', year: 1985, rating: 8 },
+  { title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
+];
+
+// Route of movies
+app.get('/movies/read', (req, res) => {
+  res.status(200).json({ status: 200, data: movies });
+});
+//creating movie
+app.get('/movies/create', (req, res) => {
+  res.status(200).json({ status: 200, message: 'Create movie route' });
+});
+//update the movie
+app.get('/movies/update', (req, res) => {
+  res.status(200).json({ status: 200, message: 'Update movie route' });
+});
+//delete the movie
+app.get('/movies/delete', (req, res) => {
+  res.status(200).json({ status: 200, message: 'Delete movie route' });
+});
+
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
