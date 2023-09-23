@@ -60,6 +60,23 @@ app.get('/movies/delete', (req, res) => {
   res.status(200).json({ status: 200, message: 'Delete movie route' });
 });
 
+//  movies ordered by date
+app.get('/movies/read/by-date', (req, res) => {
+  const moviesByDate = movies.slice().sort((a, b) => a.year - b.year);
+  res.status(200).json({ status: 200, data: moviesByDate });
+});
+
+//  movies ordered by rating
+app.get('/movies/read/by-rating', (req, res) => {
+  const moviesByRating = movies.slice().sort((a, b) => b.rating - a.rating);
+  res.status(200).json({ status: 200, data: moviesByRating });
+});
+
+//  movies ordered by title
+app.get('/movies/read/by-title', (req, res) => {
+  const moviesByTitle = movies.slice().sort((a, b) => a.title.localeCompare(b.title));
+  res.status(200).json({ status: 200, data: moviesByTitle });
+});
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
