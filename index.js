@@ -91,6 +91,40 @@ app.get('/movies/read/id/:id', (req, res) => {
     res.status(404).json({ status: 404, error: true, message: `the movie ${id} does not exist` });
   }
 });
+//add to the movie 
+//defining a route to handle url
+app.use(express.urlencoded({ extended: true }));
+
+// Route to add a new movie
+app.get('/movies/add', (req, res) => {
+  const { title, year, rating } = req.query;
+
+  // Check if title and year are provided
+  if (!title || !year) {
+    res.status(403).json({ status: 403, error: true, message: 'you cannot create a movie without providing a title and a year' });
+    return;
+  }
+// Check if year/rating is a 4-digit number
+const parsedYear = parseInt(year);
+if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
+  res.status(403).json({ status: 403, error: true, message: 'you cannot create a movie without providing a valid 4-digit year' });
+  return;
+}
+
+
+  const parsedRating = rating || 4;
+
+  const newMovie = {
+    id: movies.length + 1,
+    title,
+    year: parseInt(year),
+    rating: parseFloat(parsedRating)
+  };
+
+  // Add the new movie to the movies array
+  movies.push(newMovie);
+  res.status(200).json({ status: 200, data: movies });
+});
 
 
   app.listen(port, () => {
