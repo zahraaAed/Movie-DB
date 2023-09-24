@@ -56,8 +56,29 @@ app.get('/movies/update', (req, res) => {
   res.status(200).json({ status: 200, message: 'Update movie route' });
 });
 //delete the movie
-app.get('/movies/delete', (req, res) => {
-  res.status(200).json({ status: 200, message: 'Delete movie route' });
+//app.get('/movies/delete', (req, res) => {
+ // res.status(200).json({ status: 200, message: 'Delete movie route' });
+//});
+app.get('/movies/delete/:id', (req, res) => {
+  const { id } = req.params;
+
+  // Find the movie with the specified ID
+  const movieToDelete = movies.find((movie) => movie.id === parseInt(id));
+
+  if (!movieToDelete) {
+    res.status(404).json({ status: 404, error: true, message: `the movie ${id} does not exist` });
+    return;
+  }
+
+  // the updatedMovies is a new variable for all Id without the targeted id 
+  const updatedMovies = movies.filter((movie) => movie.id !== parseInt(id));
+
+  // Update the movies array
+  movies.length = 0; 
+  movies.push(...updatedMovies); 
+
+  // Respond with the updated list of movies
+  res.status(200).json({ status: 200, data: movies });
 });
 
 //  movies ordered by date
@@ -130,4 +151,3 @@ if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
   })
- 
