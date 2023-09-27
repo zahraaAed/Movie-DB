@@ -1,8 +1,23 @@
+require('dotenv').config(); // Load environment variables from .env file
 const express=require('express');
+const mongoose=require('mongoose');
 const app = express();
-const port = 8000;
+//const port = 8000;
+const port = process.env.PORT || 8000; // Use the PORT environment variable or default to 8000
+
 app.get('/', (req, res) => {
     res.send('ok')
+  })
+  //connect to db
+  mongoose.connect(process.env.Mongo_url)
+  .then(()=>{
+    app.listen(port, () => {
+      console.log(`connected to db & listening on port `,process.env.port)
+    });
+  
+  })
+  .catch((error)=> {
+    console.log(error)
   })
   app.get('/test', (req, res) => {
     res.status(200).json({ status: 200, message: "ok" });
@@ -27,6 +42,7 @@ app.get('/', (req, res) => {
   });
   
   // Route to respond with a search query or an error message
+
   app.get('/search', (req, res) => {
     const { s } = req.query;
     if (s) {
@@ -35,13 +51,18 @@ app.get('/', (req, res) => {
       res.status(500).json({ status: 500, error: true, message: 'you have to provide a search' });
     }
   });
+// Users array
+const users = [
+  { username: 'John', password: '1234' },
+  { username: 'Jane', password: '5678' }
+];
 
-  const movies = [
-    { id: 1, title: 'Jaws', year: 1975, rating: 8 },
-    { id: 2, title: 'Avatar', year: 2009, rating: 7.8 },
-    { id: 3, title: 'Brazil', year: 1985, rating: 8 },
-    { id: 4, title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
-  ];
+ const movies = [
+ { id: 1, title: 'Jaws', year: 1975, rating: 8 },
+  { id: 2, title: 'Avatar', year: 2009, rating: 7.8 },
+  { id: 3, title: 'Brazil', year: 1985, rating: 8 },
+   { id: 4, title: 'الإرهاب والكباب‎', year: 1992, rating: 6.2 }
+ ];
   
 // Route of movies
 app.get('/movies/read', (req, res) => {
@@ -141,7 +162,7 @@ app.get('/movies/read/id/:id', (req, res) => {
 app.use(express.urlencoded({ extended: true }));
 
 // Route to add a new movie
-app.get('/movies/add', (req, res) => {
+app.post('/movies/add', (req, res) => {
   const { title, year, rating } = req.query;
 
   // Check if title and year are provided
@@ -166,12 +187,66 @@ if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
     rating: parseFloat(parsedRating)
   };
 
+
+  // Middleware to authenticate users
+  function authenticateUser(req, res, next) {
+    const { username, password } = req.query;
+  
+    // Check if the user is in the users array
+    const user = users.find((u) => u.username === username && u.password === password);
+  
+    if (user) {
+      req.user = user;
+      next(); 
+    } else {
+      res.status(401).json({ status: 401, error: true, message: 'Authentication failed' });
+    }
+  }
+  
+  // Middleware to check if the user is authenticated before modifying or deleting movies
+  function checkAuthentication(req, res, next) {
+    if (req.user) {
+      next();
+    } else {
+      res.status(401).json({ status: 401, error: true, message: 'Authentication required' });
+    }
+  }
+  
+  // Use middleware to parse JSON requests
+  app.use(express.json());
+ 
+  app.post('/users', (req, res) => {
+    const { username, password } = req.body;
+  
+    // Check if the username is already taken
+    if (users.some((u) => u.username === username)) {
+      return res.status(400).json({ status: 400, error: true, message: 'Username already exists' });
+    }
+  
+    // Create a new user
+    const newUser = { username, password };
+    users.push(newUser);
+    res.status(201).json({ status: 201, data: newUser });
+  });
+  
+  // Secure route for modifying movies
+  app.put('/movies/update/:id', authenticateUser, checkAuthentication, (req, res) => {
+  
+  });
+  
+  // Secure route for deleting movies
+  app.delete('/movies/delete/:id', authenticateUser, checkAuthentication, (req, res) => {
+  
+  });
+  
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+  
   // Add the new movie to the movies array
   movies.push(newMovie);
   res.status(200).json({ status: 200, data: movies });
 });
 
 
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-  });
+ 
