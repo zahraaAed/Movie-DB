@@ -1,24 +1,24 @@
-require('dotenv').config(); // Load environment variables from .env file
+
 const express=require('express');
 const mongoose=require('mongoose');
 const app = express();
 //const port = 8000;
-const port = process.env.PORT || 8000; // Use the PORT environment variable or default to 8000
+const port = 8000; // Use the PORT environment variable or default to 8000
 
 app.get('/', (req, res) => {
     res.send('ok')
   })
   //connect to db
-  mongoose.connect(process.env.Mongo_url)
-  .then(()=>{
+  mongoose.connect("url")
+  .then(() => {
     app.listen(port, () => {
-      console.log(`connected to db & listening on port `,process.env.port)
+      console.log(`Connected to db & listening on port '${port}'`);
     });
-  
   })
-  .catch((error)=> {
-    console.log(error)
-  })
+  .catch((err) => {
+    console.error("Error connecting to the database:", err);
+  });
+
   app.get('/test', (req, res) => {
     res.status(200).json({ status: 200, message: "ok" });
   });
@@ -188,60 +188,6 @@ if (isNaN(parsedYear) || parsedYear < 1000 || parsedYear > 9999) {
   };
 
 
-  // Middleware to authenticate users
-  function authenticateUser(req, res, next) {
-    const { username, password } = req.query;
-  
-    // Check if the user is in the users array
-    const user = users.find((u) => u.username === username && u.password === password);
-  
-    if (user) {
-      req.user = user;
-      next(); 
-    } else {
-      res.status(401).json({ status: 401, error: true, message: 'Authentication failed' });
-    }
-  }
-  
-  // Middleware to check if the user is authenticated before modifying or deleting movies
-  function checkAuthentication(req, res, next) {
-    if (req.user) {
-      next();
-    } else {
-      res.status(401).json({ status: 401, error: true, message: 'Authentication required' });
-    }
-  }
-  
-  // Use middleware to parse JSON requests
-  app.use(express.json());
- 
-  app.post('/users', (req, res) => {
-    const { username, password } = req.body;
-  
-    // Check if the username is already taken
-    if (users.some((u) => u.username === username)) {
-      return res.status(400).json({ status: 400, error: true, message: 'Username already exists' });
-    }
-  
-    // Create a new user
-    const newUser = { username, password };
-    users.push(newUser);
-    res.status(201).json({ status: 201, data: newUser });
-  });
-  
-  // Secure route for modifying movies
-  app.put('/movies/update/:id', authenticateUser, checkAuthentication, (req, res) => {
-  
-  });
-  
-  // Secure route for deleting movies
-  app.delete('/movies/delete/:id', authenticateUser, checkAuthentication, (req, res) => {
-  
-  });
-  
-  app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
   
   // Add the new movie to the movies array
   movies.push(newMovie);
